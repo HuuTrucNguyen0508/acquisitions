@@ -1,1 +1,8 @@
-node_modules
+node_modules/
+coverage/
+logs/
+drizzle/
+.env
+drizzle/
+*.log
+package-lock.json
