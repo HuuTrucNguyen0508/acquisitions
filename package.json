@@ -4,6 +4,16 @@
     "description": "",
     "main": "index.js",
     "type": "module",
+    "imports": {
+        "#config/*": "./src/config/*",
+        "#models/*": "./src/models/*",
+        "#routes/*": "./src/routes/*",
+        "#services/*": "./src/services/*",
+        "#utils/*": "./src/utils/*",
+        "#middlewares/*": "./src/middlewares/*",
+        "#controllers/*": "./src/controllers/*",
+        "#validation/*": "./src/validation/*"
+    },
     "scripts": {
         "dev": "node --watch src/index.js",
         "lint": "eslint .",
@@ -20,9 +30,14 @@
     "packageManager": "pnpm@10.16.1",
     "dependencies": {
         "@neondatabase/serverless": "^1.0.1",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
         "dotenv": "^17.2.2",
         "drizzle-orm": "^0.44.5",
-        "express": "^5.1.0"
+        "express": "^5.1.0",
+        "helmet": "^8.1.0",
+        "morgan": "^1.10.1",
+        "winston": "^3.17.0"
     },
     "devDependencies": {
         "@eslint/js": "^9.35.0",
