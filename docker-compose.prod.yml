@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Application service for production
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: acquisitions-app-prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.production
+    networks:
+      - acquisitions-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=acquisitions-app"
+
+  # Optional: Add a reverse proxy like nginx for production
+  nginx:
+    image: nginx:alpine
+    container_name: acquisitions-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      # Add SSL certificates if using HTTPS
+      # - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - acquisitions-network
+    restart: unless-stopped
+    profiles:
+      - "with-nginx"
+
+networks:
+  acquisitions-network:
+    driver: bridge

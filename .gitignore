@@ -4,6 +4,20 @@ logs/
 drizzle/
 .env
 .env.*
-drizzle/
+!.env.example
 *.log
 package-lock.json
+
+# Docker
+.dockerignore
+
+# Neon Local metadata
+.neon_local/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
