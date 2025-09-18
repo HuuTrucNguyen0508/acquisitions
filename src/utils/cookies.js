@@ -4,7 +4,6 @@ export const cookies = {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: 1 * 24 * 60 * 60 * 1000,
-
     }),
 
     set: (res, name, value, options = {}) => {
@@ -17,5 +16,5 @@ export const cookies = {
 
     get: (req, name) => {
         return req.cookies[name];
-    }
+    },
 };

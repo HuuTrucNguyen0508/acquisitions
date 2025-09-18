@@ -1,63 +1,63 @@
 name: Lint and Format
 
 on:
-  push:
-    branches: [main, staging]
-  pull_request:
-    branches: [main, staging]
+    push:
+        branches: [main, staging]
+    pull_request:
+        branches: [main, staging]
 
 jobs:
-  lint-and-format:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    lint-and-format:
+        runs-on: ubuntu-latest
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'pnpm'
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 9.12.3
 
-      - name: Verify pnpm installation
-        run: |
-          pnpm --version
-          which pnpm
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20.x'
+                  cache: 'pnpm'
 
-      - name: Check lockfile
-        run: |
-          ls -la pnpm-lock.yaml || echo "No pnpm-lock.yaml found"
-          if [ -f pnpm-lock.yaml ]; then
-            echo "Lockfile exists, checking first few lines:"
-            head -10 pnpm-lock.yaml
-          fi
+            - name: Verify pnpm installation
+              run: |
+                  pnpm --version
+                  which pnpm
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+            - name: Check lockfile
+              run: |
+                  ls -la pnpm-lock.yaml || echo "No pnpm-lock.yaml found"
+                  if [ -f pnpm-lock.yaml ]; then
+                    echo "Lockfile exists, checking first few lines:"
+                    head -10 pnpm-lock.yaml
+                  fi
 
-      - name: Run ESLint
-        run: |
-          if ! pnpm run lint; then
-            echo "::error::ESLint found issues. Run 'pnpm run lint:fix' to automatically fix some issues."
-            exit 1
-          fi
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
 
-      - name: Check Prettier formatting
-        run: |
-          if ! pnpm run format:check; then
-            echo "::error::Code formatting issues found. Run 'pnpm run format' to fix formatting."
-            exit 1
-          fi
+            - name: Run ESLint
+              run: |
+                  if ! pnpm run lint; then
+                    echo "::error::ESLint found issues. Run 'pnpm run lint:fix' to automatically fix some issues."
+                    exit 1
+                  fi
 
-      - name: Annotate PR with lint/format suggestions
-        if: failure() && github.event_name == 'pull_request'
-        run: |
-          echo "::notice::If the workflow failed due to linting or formatting issues, you can fix them by running:"
-          echo "::notice::  pnpm run lint:fix  # Fix linting issues"
-          echo "::notice::  pnpm run format   # Fix formatting issues"
+            - name: Check Prettier formatting
+              run: |
+                  if ! pnpm run format:check; then
+                    echo "::error::Code formatting issues found. Run 'pnpm run format' to fix formatting."
+                    exit 1
+                  fi
+
+            - name: Annotate PR with lint/format suggestions
+              if: failure() && github.event_name == 'pull_request'
+              run: |
+                  echo "::notice::If the workflow failed due to linting or formatting issues, you can fix them by running:"
+                  echo "::notice::  pnpm run lint:fix  # Fix linting issues"
+                  echo "::notice::  pnpm run format   # Fix formatting issues"
