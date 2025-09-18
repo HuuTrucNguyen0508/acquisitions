@@ -1,0 +1,89 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    env:
+      NODE_ENV: test
+      NODE_OPTIONS: --experimental-vm-modules
+      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://test:test@localhost:5432/test_db' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        id: tests
+        run: |
+          if npm test; then
+            echo "tests_passed=true" >> $GITHUB_OUTPUT
+            echo "::notice::All tests passed successfully! ✅"
+          else
+            echo "tests_passed=false" >> $GITHUB_OUTPUT
+            echo "::error::Some tests failed. Please check the test output above."
+            exit 1
+          fi
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports-${{ github.run_number }}
+          path: |
+            coverage/
+            *coverage*
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Generate test summary
+        if: always()
+        run: |
+          echo "## Test Results 🧪" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.tests.outputs.tests_passed }}" == "true" ]; then
+            echo "✅ **All tests passed successfully!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- **Status**: PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "- **Environment**: $NODE_ENV" >> $GITHUB_STEP_SUMMARY
+            echo "- **Node Options**: $NODE_OPTIONS" >> $GITHUB_STEP_SUMMARY
+            echo "- **Run ID**: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+            
+            if [ -d "coverage" ] || ls *coverage* 1> /dev/null 2>&1; then
+              echo "- **Coverage**: Reports uploaded as artifacts" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- **Coverage**: No coverage reports found" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "❌ **Tests failed**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- **Status**: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "- **Environment**: $NODE_ENV" >> $GITHUB_STEP_SUMMARY
+            echo "- **Node Options**: $NODE_OPTIONS" >> $GITHUB_STEP_SUMMARY
+            echo "- **Run ID**: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please check the test output above for detailed failure information." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Annotate test failures
+        if: failure()
+        run: |
+          echo "::error::Test execution failed. Please review the test output and fix any failing tests."
+          echo "::notice::To run tests locally, use: npm test"
+          echo "::notice::Make sure your environment variables are properly set: NODE_ENV=test, NODE_OPTIONS=--experimental-vm-modules"

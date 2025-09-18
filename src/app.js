@@ -19,8 +19,8 @@ app.use(morgan('combined', { stream: { write: (message) => logger.info(message.t
 app.use(securityMiddleware);
 
 app.get('/', (req, res) => {
-    logger.info('Hello from aquisitions');
-    res.status(200).send('Hello from aquisitions');
+    logger.info('Hello from acquisitions');
+    res.status(200).send('Hello from acquisitions');
 });
 
 app.get('/health', (req, res) => {
@@ -28,10 +28,16 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api', (req, res) => {
-    res.status(200).json({ message: 'Aquisitions API is running' });
+    res.status(200).json({ message: 'Acquisitions API is running' });
 });
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
+
+app.use((req,res) => {
+    res.status(404).json({
+        error: 'Route not found'
+    });
+});
 
 export default app;

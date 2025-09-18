@@ -1,21 +1,15 @@
 import express from 'express';
-import { fetchAllUsers } from '#controllers/users.controller.js';
+import { fetchAllUsers, getUserById, updateUser, deleteUser } from '#controllers/users.controller.js';
+import { authenticateToken } from '#middleware/auth.middleware.js';
 
 const router = express.Router();
 
+// Public route - get all users (you might want to protect this too)
 router.get('/', fetchAllUsers);
 
-router.get('/:id', (req, res) => {
-    res.send('get /users/:id');
-});
-
-router.put('/:id', (req, res) => {
-    res.send('PUT /users/:id');
-});
-
-router.delete('/:id', (req, res) => {
-    res.send('DELETE /users/:id');
-});
-
+// Protected routes - require authentication
+router.get('/:id', authenticateToken, getUserById);
+router.put('/:id', authenticateToken, updateUser);
+router.delete('/:id', authenticateToken, deleteUser);
 
 export default router;
