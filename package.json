@@ -24,7 +24,8 @@
         "db:generate": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
         "db:studio": "drizzle-kit studio",
-        "dev:docker": "pwsh -ExecutionPolicy Bypass -File ./scripts/dev.ps1 start"
+        "dev:docker": "pwsh -ExecutionPolicy Bypass -File ./scripts/dev.ps1 start",
+        "prod:docker": "pwsh -ExecutionPolicy Bypass -File ./scripts/prod.ps1 start"
     },
     "keywords": [],
     "author": "",
